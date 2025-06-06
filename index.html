@@ -1,1 +1,550 @@
-Test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Summary | Investment Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #e6f2ff;
+            --success: #4cc9f0;
+            --success-light: #e8f5e9;
+            --danger: #f72585;
+            --danger-light: #ffebee;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .header-title i {
+            font-size: 1.5rem;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .tab:hover:not(.active) {
+            color: var(--dark);
+        }
+        
+        .search-filter {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border-radius: 50px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .search-bar i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .filter-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .filter-btn:hover:not(.active) {
+            background-color: #f5f5f5;
+        }
+        
+        .reset-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background-color: #ff4d4f;
+            color: white;
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .reset-btn:hover {
+            background-color: #e63946;
+        }
+        
+        .stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+        }
+        
+        .stock-table th,
+        .stock-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .stock-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .stock-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .stock-table .total-row {
+            font-weight: 700;
+            background-color: #f0f0f0;
+        }
+        
+        .stock-table .total-row td {
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .stock-status {
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .stock-status.held {
+            background-color: var(--success-light);
+            color: #0a9396;
+        }
+        
+        .stock-status.to-sell {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+        
+        .metric-value {
+            font-weight: 600;
+        }
+        
+        .stock-table input {
+            width: 80px;
+            padding: 0.25rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        @media (max-width: 768px) {
+            .stock-table {
+                font-size: 0.9rem;
+            }
+            
+            .stock-table th,
+            .stock-table td {
+                padding: 0.5rem;
+            }
+            
+            .stock-table input {
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="header-title">
+                <i class="fas fa-chart-line"></i>
+                Portfolio Summary
+            </h1>
+        </header>
+        
+        <div class="search-filter">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search stocks...">
+            </div>
+            
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-layer-group"></i>
+                    All
+                </button>
+                <button class="filter-btn" data-filter="held">
+                    <i class="fas fa-check-circle"></i>
+                    Held
+                </button>
+                <button class="filter-btn" data-filter="to-sell">
+                    <i class="fas fa-times-circle"></i>
+                    To Sell
+                </button>
+                <button class="reset-btn" id="resetBtn">
+                    <i class="fas fa-undo"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="all">All Stocks</div>
+            <div class="tab" data-tab="dividend">Dividend Stocks</div>
+            <div class="tab" data-tab="no-dividend">Stocks with No Dividend</div>
+        </div>
+        
+        <div id="stockTable">
+            <!-- Stocks will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Stock data
+        const stocks = [
+            { symbol: "NATIONALUM", status: "Held", dividend: 10, stockQty: 0, dividendAmount: 0 },
+            { symbol: "KEYFINSERV", status: "Held", dividend: 1, stockQty: 0, dividendAmount: 0 },
+            { symbol: "MAFATIND", status: "Held", dividend: 1, stockQty: 0, dividendAmount: 0 },
+            { symbol: "ONGC", status: "Held", dividend: 13.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "PTC", status: "Held", dividend: 12.8, stockQty: 0, dividendAmount: 0 },
+            { symbol: "TATAMOTORS", status: "Held", dividend: 6, stockQty: 0, dividendAmount: 0 },
+            { symbol: "ASHOKA", status: "Held", dividend: 0, stockQty: 0, dividendAmount: 0 },
+            { symbol: "BFINVEST", status: "Held", dividend: 0, stockQty: 0, dividendAmount: 0 },
+            { symbol: "EMAMIPAP", status: "Held", dividend: 1.6, stockQty: 0, dividendAmount: 0 },
+            { symbol: "HINDALCO", status: "Held", dividend: 3.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "JINDALPHOT", status: "Held", dividend: 0, stockQty: 0, dividendAmount: 0 },
+            { symbol: "JINDALSAW", status: "Held", dividend: 4, stockQty: 0, dividendAmount: 0 },
+            { symbol: "ALBERTDAVD", status: "Held", dividend: 11.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "EKC", status: "Held", dividend: 0.7, stockQty: 0, dividendAmount: 0 },
+            { symbol: "IMFA", status: "Held", dividend: 22.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "IOC", status: "Held", dividend: 12, stockQty: 0, dividendAmount: 0 },
+            { symbol: "KIRANVYAPAR", status: "Held", dividend: 1, stockQty: 0, dividendAmount: 0 },
+            { symbol: "PRAKASH", status: "Held", dividend: 1.2, stockQty: 0, dividendAmount: 0 },
+            { symbol: "SCI", status: "Held", dividend: 0.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "VLS FINANCE", status: "Held", dividend: 2.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "KUANTUM", status: "Held", dividend: 3, stockQty: 0, dividendAmount: 0 },
+            { symbol: "BMW", status: "Held", dividend: 0.43, stockQty: 0, dividendAmount: 0 },
+            { symbol: "SUNDARAMHLD", status: "Held", dividend: 7.7, stockQty: 0, dividendAmount: 0 },
+            { symbol: "GPIL", status: "Held", dividend: 11, stockQty: 0, dividendAmount: 0 },
+            { symbol: "NATCOPHARM", status: "Held", dividend: 6, stockQty: 0, dividendAmount: 0 },
+            { symbol: "SMCGLOBAL", status: "To Sell", dividend: 2.4, stockQty: 0, dividendAmount: 0 },
+            { symbol: "VIKASLIFE", status: "To Sell", dividend: 0, stockQty: 0, dividendAmount: 0 },
+            { symbol: "JAYAGROGN", status: "To Sell", dividend: 7.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "GHCLTEXTIL", status: "To Sell", dividend: 0.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "GVKPIL", status: "To Sell", dividend: 0, stockQty: 0, dividendAmount: 0 }
+        ];
+
+        // DOM elements
+        const stockTable = document.getElementById('stockTable');
+        const searchInput = document.getElementById('searchInput');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const tabButtons = document.querySelectorAll('.tab');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Current filter state
+        let currentFilter = 'all';
+        let currentTab = 'all';
+        let searchQuery = '';
+
+        // Initialize the app
+        function init() {
+            renderStocks();
+            setupEventListeners();
+        }
+
+        // Render stocks based on current filters
+        function renderStocks() {
+            stockTable.innerHTML = '';
+
+            const filteredStocks = stocks.filter(stock => {
+                // Filter by status
+                const statusMatch = currentFilter === 'all' || stock.status.toLowerCase().replace(' ', '-') === currentFilter;
+                
+                // Filter by tab
+                let tabMatch = true;
+                if (currentTab === 'dividend') {
+                    tabMatch = stock.dividend > 0;
+                } else if (currentTab === 'no-dividend') {
+                    tabMatch = stock.dividend === 0;
+                }
+                
+                // Filter by search
+                const searchMatch = stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
+                
+                return statusMatch && tabMatch && searchMatch;
+            });
+
+            if (filteredStocks.length === 0) {
+                stockTable.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h3>No stocks found</h3>
+                        <p>Try adjusting your filters or search query</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create table structure
+            const table = document.createElement('table');
+            table.className = 'stock-table';
+            
+            // Table header
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Stock Name</th>
+                        <th>Status</th>
+                        <th>Dividend/Share</th>
+                        <th>Stock Qty</th>
+                        <th>Your Dividend</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+            
+            const tbody = table.querySelector('tbody');
+
+            filteredStocks.forEach(stock => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${stock.symbol}</td>
+                    <td>
+                        <span class="stock-status ${stock.status.toLowerCase().replace(' ', '-')}">
+                            ${stock.status}
+                        </span>
+                    </td>
+                    <td class="metric-value">${stock.dividend > 0 ? '₹' + stock.dividend.toFixed(2) : 'None'}</td>
+                    <td>
+                        <input type="number" class="stock-qty-input" min="0" value="${stock.stockQty}" data-symbol="${stock.symbol}">
+                    </td>
+                    <td class="metric-value dividend-amount">₹${stock.dividendAmount.toLocaleString()}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+
+            // Calculate total dividend
+            const totalDividend = filteredStocks.reduce((sum, stock) => sum + stock.dividendAmount, 0);
+            
+            // Add total dividend row
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            totalRow.innerHTML = `
+                <td colspan="4">Total Dividend</td>
+                <td class="metric-value total-dividend">₹${totalDividend.toLocaleString()}</td>
+            `;
+            tbody.appendChild(totalRow);
+
+            stockTable.appendChild(table);
+
+            // Add event listeners to stock quantity inputs
+            document.querySelectorAll('.stock-qty-input').forEach(input => {
+                input.addEventListener('input', handleStockQtyChange);
+            });
+        }
+
+        // Handle stock quantity change
+        function handleStockQtyChange(e) {
+            const symbol = e.target.dataset.symbol;
+            const stockQty = parseInt(e.target.value) || 0;
+
+            // Update the stock data
+            const stock = stocks.find(s => s.symbol === symbol);
+            stock.stockQty = stockQty;
+            stock.dividendAmount = stock.dividend * stockQty;
+
+            // Update the displayed dividend amount
+            const row = e.target.closest('tr');
+            const dividendAmountElement = row.querySelector('.dividend-amount');
+            dividendAmountElement.textContent = `₹${stock.dividendAmount.toLocaleString()}`;
+
+            // Update total dividend
+            const filteredStocks = stocks.filter(stock => {
+                const statusMatch = currentFilter === 'all' || stock.status.toLowerCase().replace(' ', '-') === currentFilter;
+                let tabMatch = true;
+                if (currentTab === 'dividend') {
+                    tabMatch = stock.dividend > 0;
+                } else if (currentTab === 'no-dividend') {
+                    tabMatch = stock.dividend === 0;
+                }
+                const searchMatch = stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
+                return statusMatch && tabMatch && searchMatch;
+            });
+            const totalDividend = filteredStocks.reduce((sum, stock) => sum + stock.dividendAmount, 0);
+            document.querySelector('.total-dividend').textContent = `₹${totalDividend.toLocaleString()}`;
+        }
+
+        // Handle reset button click
+        function handleReset() {
+            stocks.forEach(stock => {
+                stock.stockQty = 0;
+                stock.dividendAmount = 0;
+            });
+            renderStocks();
+        }
+
+        // Handle filter button clicks
+        function handleFilterClick(e) {
+            const filter = e.currentTarget.dataset.filter;
+            
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            currentFilter = filter;
+            renderStocks();
+        }
+
+        // Handle tab clicks
+        function handleTabClick(e) {
+            const tab = e.currentTarget.dataset.tab;
+            
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            currentTab = tab;
+            renderStocks();
+        }
+
+        // Handle search input
+        function handleSearchInput(e) {
+            searchQuery = e.target.value;
+            renderStocks();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            filterButtons.forEach(btn => btn.addEventListener('click', handleFilterClick));
+            tabButtons.forEach(btn => btn.addEventListener('click', handleTabClick));
+            searchInput.addEventListener('input', handleSearchInput);
+            resetBtn.addEventListener('click', handleReset);
+        }
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
