@@ -62,6 +62,25 @@
             font-size: 1.5rem;
         }
         
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            background-color: var(--primary-light);
+        }
+        
         .tabs {
             display: flex;
             border-bottom: 1px solid #e0e0e0;
@@ -200,6 +219,12 @@
             background-color: #f9f9f9;
             font-weight: 600;
             color: var(--dark);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .stock-table th:hover {
+            background-color: #f0f0f0;
         }
         
         .stock-table tr:hover {
@@ -262,6 +287,16 @@
             color: var(--dark);
         }
         
+        .sort-icon {
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .sort-icon.active {
+            color: var(--primary);
+        }
+        
         @media (max-width: 768px) {
             .stock-table {
                 font-size: 0.9rem;
@@ -285,6 +320,9 @@
                 <i class="fas fa-chart-line"></i>
                 Portfolio Summary
             </h1>
+            <div class="nav-links">
+                <a href="documentation.html">Documentation</a>
+            </div>
         </header>
         
         <div class="search-filter">
@@ -377,6 +415,8 @@
         let currentFilter = 'all';
         let currentTab = 'all';
         let searchQuery = '';
+        let sortColumn = null;
+        let sortDirection = 'asc';
 
         // Initialize the app
         function init() {
@@ -384,50 +424,83 @@
             setupEventListeners();
         }
 
+        // Sort stocks
+        function sortStocks(stocks, column, direction) {
+            return stocks.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch(column) {
+                    case 'symbol':
+                        valueA = a.symbol.toLowerCase();
+                        valueB = b.symbol.toLowerCase();
+                        break;
+                    case 'status':
+                        valueA = a.status.toLowerCase();
+                        valueB = b.status.toLowerCase();
+                        break;
+                    case 'dividend':
+                        valueA = a.dividend;
+                        valueB = b.dividend;
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (valueA < valueB) return direction === 'asc' ? -1 : 1;
+                if (valueA > valueB) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
         // Render stocks based on current filters
         function renderStocks() {
             stockTable.innerHTML = '';
 
             const filteredStocks = stocks.filter(stock => {
-                // Filter by status
                 const statusMatch = currentFilter === 'all' || stock.status.toLowerCase().replace(' ', '-') === currentFilter;
-                
-                // Filter by tab
                 let tabMatch = true;
                 if (currentTab === 'dividend') {
                     tabMatch = stock.dividend > 0;
                 } else if (currentTab === 'no-dividend') {
                     tabMatch = stock.dividend === 0;
                 }
-                
-                // Filter by search
                 const searchMatch = stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
-                
                 return statusMatch && tabMatch && searchMatch;
             });
+
+            if (sortColumn) {
+                sortStocks(filteredStocks, sortColumn, sortDirection);
+            }
 
             if (filteredStocks.length === 0) {
                 stockTable.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-box-open"></i>
                         <h3>No stocks found</h3>
-                        <p>Try adjusting your filters or search query</p>
+                        <p>Try adjusting your UIfilters or search query</p>
                     </div>
                 `;
                 return;
             }
 
-            // Create table structure
             const table = document.createElement('table');
             table.className = 'stock-table';
             
-            // Table header
             table.innerHTML = `
                 <thead>
                     <tr>
-                        <th>Stock Name</th>
-                        <th>Status</th>
-                        <th>Dividend/Share</th>
+                        <th data-sort="symbol">
+                            Stock Name
+                            <i class="fas fa-sort${sortColumn === 'symbol' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'symbol' ? ' active' : ''}"></i>
+                        </th>
+                        <th data-sort="status">
+                            Status
+                            <i class="fas fa-sort${sortColumn === 'status' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'status' ? ' active' : ''}"></i>
+                        </th>
+                        <th data-sort="dividend">
+                            Dividend/Share
+                            <i class="fas fa-sort${sortColumn === 'dividend' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'dividend' ? ' active' : ''}"></i>
+                        </th>
                         <th>Stock Qty</th>
                         <th>Your Dividend</th>
                     </tr>
@@ -456,10 +529,8 @@
                 tbody.appendChild(row);
             });
 
-            // Calculate total dividend
             const totalDividend = filteredStocks.reduce((sum, stock) => sum + stock.dividendAmount, 0);
             
-            // Add total dividend row
             const totalRow = document.createElement('tr');
             totalRow.className = 'total-row';
             totalRow.innerHTML = `
@@ -470,28 +541,38 @@
 
             stockTable.appendChild(table);
 
-            // Add event listeners to stock quantity inputs
             document.querySelectorAll('.stock-qty-input').forEach(input => {
                 input.addEventListener('input', handleStockQtyChange);
             });
+
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', handleSortClick);
+            });
         }
 
-        // Handle stock quantity change
+        function handleSortClick(e) {
+            const column = e.currentTarget.dataset.sort;
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            renderStocks();
+        }
+
         function handleStockQtyChange(e) {
             const symbol = e.target.dataset.symbol;
             const stockQty = parseInt(e.target.value) || 0;
 
-            // Update the stock data
             const stock = stocks.find(s => s.symbol === symbol);
             stock.stockQty = stockQty;
             stock.dividendAmount = stock.dividend * stockQty;
 
-            // Update the displayed dividend amount
             const row = e.target.closest('tr');
             const dividendAmountElement = row.querySelector('.dividend-amount');
             dividendAmountElement.textContent = `₹${stock.dividendAmount.toLocaleString()}`;
 
-            // Update total dividend
             const filteredStocks = stocks.filter(stock => {
                 const statusMatch = currentFilter === 'all' || stock.status.toLowerCase().replace(' ', '-') === currentFilter;
                 let tabMatch = true;
@@ -507,7 +588,6 @@
             document.querySelector('.total-dividend').textContent = `₹${totalDividend.toLocaleString()}`;
         }
 
-        // Handle reset button click
         function handleReset() {
             stocks.forEach(stock => {
                 stock.stockQty = 0;
@@ -516,7 +596,6 @@
             renderStocks();
         }
 
-        // Handle filter button clicks
         function handleFilterClick(e) {
             const filter = e.currentTarget.dataset.filter;
             
@@ -526,7 +605,6 @@
             renderStocks();
         }
 
-        // Handle tab clicks
         function handleTabClick(e) {
             const tab = e.currentTarget.dataset.tab;
             
@@ -536,13 +614,11 @@
             renderStocks();
         }
 
-        // Handle search input
         function handleSearchInput(e) {
             searchQuery = e.target.value;
             renderStocks();
         }
 
-        // Set up event listeners
         function setupEventListeners() {
             filterButtons.forEach(btn => btn.addEventListener('click', handleFilterClick));
             tabButtons.forEach(btn => btn.addEventListener('click', handleTabClick));
@@ -550,7 +626,6 @@
             resetBtn.addEventListener('click', handleReset);
         }
 
-        // Initialize the application
         init();
     </script>
 </body>
