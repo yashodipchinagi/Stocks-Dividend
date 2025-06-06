@@ -1,1 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Metrics | Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #e6f2ff;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .header-title i {
+            font-size: 1.5rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .reference-table {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .reference-table h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .reference-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+        }
+        
+        .reference-table th,
+        .reference-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .reference-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--dark);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .reference-table th:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .reference-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .sort-icon {
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .sort-icon.active {
+            color: var(--primary);
+        }
+        
+        .number-column {
+            width: 60px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .reference-table {
+                font-size: 0.9rem;
+            }
+            
+            .reference-table th,
+            .reference-table td {
+                padding: 0.5rem;
+            }
+            
+            .number-column {
+                width: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="header-title">
+                <i class="fas fa-book"></i>
+                Investment Metrics
+            </h1>
+            <div class="nav-links">
+                <a href="index.html">Portfolio Summary</a>
+            </div>
+        </header>
+        
+        <div class="reference-table">
+            <h2>Investment Metrics Reference</h2>
+            <table id="metricsTable">
+                <thead>
+                    <tr>
+                        <th class="number-column">No.</th>
+                        <th data-sort="name">
+                            Metric Name
+                            <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                        <th>Criteria</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 
+    <script>
+        // Metrics data
+        const metrics = [
+            { name: "ROE Ann. %", criteria: "> 20% or \"High in Industry\"", description: "Strong returns on equity, indicating efficient use of capital." },
+            { name: "Piotroski Score", criteria: "≥ 7", description: "High financial strength based on profitability, leverage, and efficiency." },
+            { name: "PE TTM", criteria: "< 15 or \"Below Industry Median\"", description: "Stock is undervalued relative to earnings." },
+            { name: "Rev. Growth Ann. YOY %", criteria: "> 10%", description: "Robust year-over-year revenue growth." },
+            { name: "Net Profit Ann. YOY Growth %", criteria: "> 15%", description: "Significant year-over-year profit increase." },
+            { name: "Total Debt to Total Equity Ann.", criteria: "< 0.5 or \"Below Industry Median\"", description: "Low debt levels relative to equity, indicating financial stability." },
+            { name: "Price_to_IV_Distance", criteria: "< 0", description: "Stock price is below intrinsic value, suggesting a bargain." },
+            { name: "ROIC Ann. %", criteria: "> 15% or \"High in Industry\"", description: "High return on invested capital, showing efficient resource use." },
+            { name: "Net Cash Flow Ann.", criteria: "> 0", description: "Positive cash flow, indicating healthy liquidity." },
+            { name: "PEG TTM", criteria: "< 1", description: "Good balance of growth and value based on earnings growth." },
+            { name: "Market Capitalization", criteria: "\"High in Industry\" or < ₹5,000 crore", description: "Large or small-cap stocks with stability or high potential." },
+            { name: "Dividend Yield 3YR %", criteria: "> 2% or \"Above Industry Median\"", description: "Consistent and attractive dividend returns." },
+            { name: "Promoter Holding %", criteria: "> 50% and \"No Change in Promoter Holding\"", description: "Strong promoter confidence with stable ownership." },
+            { name: "Price to Book", criteria: "< 1 or \"Below Industry Median\"", description: "Stock is undervalued relative to its book value." },
+            { name: "Cash from Operating Act. Ann.", criteria: "\"High in Industry\"", description: "Strong cash generation from core operations." },
+            { name: "Operating Margin %", criteria: "> 15% or \"Above Industry Median\"", description: "High profitability from core business activities." },
+            { name: "Free Cash Flow", criteria: "> 0", description: "Positive free cash flow for reinvestment or payouts." },
+            { name: "Dividend Payout Ratio", criteria: "20-50%", description: "Balanced dividend payments with growth retention." },
+            { name: "Interest Coverage Ratio", criteria: "> 3", description: "Strong ability to cover interest expenses." },
+            { name: "Revenue Growth 3YR CAGR", criteria: "> 10%", description: "Consistent long-term revenue growth." },
+            { name: "Sustainability Ratio", criteria: "> 3%", description: "Solid cash flow sustainability for operations." },
+            { name: "Debt to OCF Ratio", criteria: "< 3", description: "Low debt relative to operating cash flow, indicating manageability." },
+            { name: "Cash Conversion Efficiency", criteria: "> 100% or positive", description: "Efficient conversion of profits to cash." }
+        ];
+
+        // DOM elements
+        const metricsTable = document.getElementById('metricsTable');
+
+        // Sort state
+        let sortColumn = null;
+        let sortDirection = 'asc';
+
+        // Initialize the app
+        function init() {
+            renderMetrics();
+            setupEventListeners();
+        }
+
+        // Sort metrics
+        function sortMetrics(metrics, column, direction) {
+            return metrics.sort((a, b) => {
+                const valueA = a[column].toLowerCase();
+                const valueB = b[column].toLowerCase();
+                if (valueA < valueB) return direction === 'asc' ? -1 : 1;
+                if (valueA > valueB) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // Render metrics table
+        function renderMetrics() {
+            const tbody = metricsTable.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            // Create a copy of metrics to avoid modifying the original
+            const sortedMetrics = [...metrics];
+            if (sortColumn) {
+                sortMetrics(sortedMetrics, sortColumn, sortDirection);
+            }
+
+            sortedMetrics.forEach((metric, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="number-column">${index + 1}</td>
+                    <td>${metric.name}</td>
+                    <td>${metric.criteria}</td>
+                    <td>${metric.description}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update sort icon
+            const sortIcon = metricsTable.querySelector('th[data-sort="name"] .sort-icon');
+            sortIcon.className = `fas fa-sort${sortColumn === 'name' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'name' ? ' active' : ''}`;
+        }
+
+        // Handle sort click
+        function handleSortClick(e) {
+            const column = e.currentTarget.dataset.sort;
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            renderMetrics();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            metricsTable.querySelector('th[data-sort="name"]').addEventListener('click', handleSortClick);
+        }
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
