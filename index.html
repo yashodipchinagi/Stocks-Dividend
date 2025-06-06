@@ -385,7 +385,7 @@
             { symbol: "KIRANVYAPAR", status: "Held", dividend: 1, stockQty: 0, dividendAmount: 0 },
             { symbol: "PRAKASH", status: "Held", dividend: 1.2, stockQty: 0, dividendAmount: 0 },
             { symbol: "SCI", status: "Held", dividend: 0.5, stockQty: 0, dividendAmount: 0 },
-            { symbol: "VLS FINANCE", status: "Held", dividend: 2.5, stockQty: 0, dividendAmount: 0 },
+            { symbol: "VLSFINANCE", status: "Held", dividend: 2.5, stockQty: 0, dividendAmount: 0 },
             { symbol: "KUANTUM", status: "Held", dividend: 3, stockQty: 0, dividendAmount: 0 },
             { symbol: "BMW", status: "Held", dividend: 0.43, stockQty: 0, dividendAmount: 0 },
             { symbol: "SUNDARAMHLD", status: "Held", dividend: 7.7, stockQty: 0, dividendAmount: 0 },
@@ -396,11 +396,11 @@
             { symbol: "JAYAGROGN", status: "To Sell", dividend: 7.5, stockQty: 0, dividendAmount: 0 },
             { symbol: "GHCLTEXTIL", status: "To Sell", dividend: 0.5, stockQty: 0, dividendAmount: 0 },
             { symbol: "SGBJUN29II-GB", status: "Held", dividend: 120.18, stockQty: 0, dividendAmount: 0 },
-            { symbol: "SGBD29VII-GB", status: "Held", dividend: 119.78, stockQty: 0, dividendAmount: 0 },
+            { symbol: "SGBD29VIII-GB", status: "Held", dividend: 119.78, stockQty: 0, dividendAmount: 0 },
             { symbol: "SGBSEP31II-GB", status: "Held", dividend: 148.08, stockQty: 0, dividendAmount: 0 },
             { symbol: "SGBAUG30-GB", status: "Held", dividend: 129.94, stockQty: 0, dividendAmount: 0 },
             { symbol: "SGBJAN29IX-GB", status: "Held", dividend: 125, stockQty: 0, dividendAmount: 0 },
-            { symbol: "SGBJAN3OIX-GB", status: "Held", dividend: 119.66, stockQty: 0, dividendAmount: 0 },
+            { symbol: "SGBJAN30IX-GB", status: "Held", dividend: 119.66, stockQty: 0, dividendAmount: 0 },
             { symbol: "SGBMAY29I-GB", status: "Held", dividend: 119.44, stockQty: 0, dividendAmount: 0 },
             { symbol: "GVKPIL", status: "To Sell", dividend: 0, stockQty: 0, dividendAmount: 0 }
         ];
@@ -478,7 +478,7 @@
                     <div class="empty-state">
                         <i class="fas fa-box-open"></i>
                         <h3>No stocks found</h3>
-                        <p>Try adjusting your UIfilters or search query</p>
+                        <p>Try adjusting your filters or search query</p>
                     </div>
                 `;
                 return;
@@ -513,8 +513,13 @@
 
             filteredStocks.forEach(stock => {
                 const row = document.createElement('tr');
+                const isSGB = stock.symbol.startsWith('SGB');
+                const link = isSGB
+                    ? `https://in.tradingview.com/symbols/BSE-${stock.symbol}/`
+                    : `https://www.google.com/finance/quote/${stock.symbol}:NSE`;
+                
                 row.innerHTML = `
-                    <td>${stock.symbol}</td>
+                    <td><a href="${link}" target="_blank">${stock.symbol}</a></td>
                     <td>
                         <span class="stock-status ${stock.status.toLowerCase().replace(' ', '-')}">
                             ${stock.status}
