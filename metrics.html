@@ -1,1 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Metrics | Investment Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #e6f2ff;
+            --success: #4cc9f0;
+            --success-light: #e8f5e9;
+            --danger: #f72585;
+            --danger-light: #ffebee;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .header-title i {
+            font-size: 1.5rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .year-selector {
+            margin-bottom: 1.5rem;
+        }
+        
+        .year-selector select {
+            padding: 0.75rem;
+            border-radius: 50px;
+            border: 1px solid #e0e0e0;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .year-selector select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .tab:hover:not(.active) {
+            color: var(--dark);
+        }
+        
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+        
+        .metrics-table th,
+        .metrics-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        
+        .metrics-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--dark);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .metrics-table th:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .metrics-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .sort-icon {
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .sort-icon.active {
+            color: var(--primary);
+        }
+        
+        @media (max-width: 768px) {
+            .metrics-table {
+                font-size: 0.9rem;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .metrics-table th,
+            .metrics-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="header-title">
+                <i class="fas fa-chart-bar"></i>
+                Stock Metrics
+            </h1>
+            <div class="nav-links">
+                <a href="index.html">Portfolio Summary</a>
+                <a href="documentation.html">Documentation</a>
+            </div>
+        </header>
+        
+        <div class="year-selector">
+            <select id="yearSelect">
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+            </select>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-quarter="Q1">Q1</div>
+            <div class="tab" data-quarter="Q2">Q2</div>
+            <div class="tab" data-quarter="Q3">Q3</div>
+            <div class="tab" data-quarter="Q4">Q4</div>
+        </div>
+        
+        <div id="metricsTable">
+            <!-- Metrics will be dynamically inserted here -->
+        </div>
+    </div>
 
+    <script>
+        // Metrics data
+        const metricsData = {
+            '2025': {
+                'Q1': [],
+                'Q2': [
+                    { symbol: 'ALBERTDAVD', currentPrice: 806.2, peTTM: 26.75, epsTTM: 30.14, dividendYield: 1.22, marketCap: 460.11, roic: 4.27, roa: 3.36, roe: 4.38 },
+                    { symbol: 'ASHOKA', currentPrice: 223.14, peTTM: 3.7, epsTTM: 60.35, dividendYield: 0, marketCap: 6264.06, roic: 21.8, roa: 8.15, roe: 43.26 },
+                    { symbol: 'BFINVEST', currentPrice: 512.35, peTTM: 8.68, epsTTM: 59.01, dividendYield: 0, marketCap: 1929.9, roic: 6.99, roa: 6.36, roe: 6.99 },
+                    { symbol: 'BENGALASM', currentPrice: 7534.4, peTTM: 11.63, epsTTM: 648.01, dividendYield: 0.35, marketCap: 8511.08, roic: 41.1, roa: 37.16, roe: 42.97 },
+                    { symbol: 'EMAMIPAP', currentPrice: 99.14, peTTM: 23.06, epsTTM: 4.3, dividendYield: 1.61, marketCap: 599.79, roic: 1.8, roa: 1.43, roe: 3.83 },
+                    { symbol: 'EKC', currentPrice: 135.35, peTTM: 15.51, epsTTM: 8.73, dividendYield: 0.52, marketCap: 1518.73, roic: 7.26, roa: 6.06, roe: 8.11 },
+                    { symbol: 'GHCLTEXTIL', currentPrice: 91.21, peTTM: 15.58, epsTTM: 5.86, dividendYield: 0.18, marketCap: 871.84, roic: 3.73, roa: 3.28, roe: 3.89 },
+                    { symbol: 'GVKPIL', currentPrice: 4.08, peTTM: 1.14, epsTTM: 3.58, dividendYield: 0, marketCap: 644.32, roic: 20.53, roa: 10.93, roe: -91.54 },
+                    { symbol: 'GPIL', currentPrice: 187.93, peTTM: 15.5, epsTTM: 12.13, dividendYield: 0.67, marketCap: 12577.38, roic: 15.57, roa: 13.18, roe: 16.54 },
+                    { symbol: 'HINDALCO', currentPrice: 650.15, peTTM: 9.13, epsTTM: 71.2, dividendYield: 0.54, marketCap: 146103.43, roic: 8.62, roa: 6.01, roe: 12.93 },
+                    { symbol: 'IMFA', currentPrice: 734.5, peTTM: 10.46, epsTTM: 70.19, dividendYield: 2.84, marketCap: 3962.93, roic: 13.92, roa: 11.91, roe: 16.12 },
+                    { symbol: 'IOC', currentPrice: 140.78, peTTM: 14.62, epsTTM: 9.63, dividendYield: 4.12, marketCap: 198798.79, roic: 4.13, roa: 2.68, roe: 7.29 },
+                    { symbol: 'JAYAGROGN', currentPrice: 257.3, peTTM: 14.05, epsTTM: 18.32, dividendYield: 2.01, marketCap: 771.9, roic: 8.04, roa: 6.31, roe: 9.51 },
+                    { symbol: 'JINDALPHOT', currentPrice: 850.5, peTTM: 3.86, epsTTM: 220.25, dividendYield: 0, marketCap: 872.47, roic: 11.47, roa: 11.37, roe: 11.74 },
+                    { symbol: 'JINDALSAW', currentPrice: 217.85, peTTM: 8.01, epsTTM: 27.18, dividendYield: 0.99, marketCap: 13931.69, roic: 10.83, roa: 8.36, roe: 15.23 },
+                    { symbol: 'KEYFINSERV', currentPrice: 279, peTTM: 10.66, epsTTM: 26.17, dividendYield: 0.36, marketCap: 155.31, roic: 21.43, roa: 19.14, roe: 21.55 },
+                    { symbol: 'KIRANVYAPAR', currentPrice: 244.25, peTTM: 11.17, epsTTM: 21.87, dividendYield: 0.48, marketCap: 666.42, roic: 2.79, roa: 2.55, roe: 2.93 },
+                    { symbol: 'KUANTUM', currentPrice: 114.07, peTTM: 8.64, epsTTM: 13.2, dividendYield: 1.75, marketCap: 995.42, roic: 6.17, roa: 5.45, roe: 9.49 },
+                    { symbol: 'MAFATLAIND', currentPrice: 129.2, peTTM: 9.48, epsTTM: 13.63, dividendYield: 0.26, marketCap: 929.05, roic: 12.11, roa: 7.04, roe: 13.22 },
+                    { symbol: 'NATCOPHARM', currentPrice: 858.3, peTTM: 8.15, epsTTM: 105.26, dividendYield: 0.82, marketCap: 15373, roic: 23.93, roa: 21.84, roe: 24.78 },
+                    { symbol: 'NATIONALUM', currentPrice: 188.47, peTTM: 6.57, epsTTM: 28.68, dividendYield: 3.36, marketCap: 34615, roic: 29.38, roa: 23.02, roe: 29.58 },
+                    { symbol: 'ONGC', currentPrice: 240.06, peTTM: 8.35, epsTTM: 28.74, dividendYield: 5.24, marketCap: 302002.18, roic: 7.29, roa: 4.77, roe: 10.54 },
+                    { symbol: 'PTC', currentPrice: 173.69, peTTM: 5.71, epsTTM: 30.41, dividendYield: 5.07, marketCap: 5141.37, roic: 10.29, roa: 6.97, roe: 15.5 },
+                    { symbol: 'PRAKASH', currentPrice: 168.73, peTTM: 8.5, epsTTM: 19.85, dividendYield: 0.24, marketCap: 3021.65, roic: 9.5, roa: 7.92, roe: 10.71 },
+                    { symbol: 'SMCGLOBAL', currentPrice: 117.66, peTTM: 8.46, epsTTM: 13.92, dividendYield: 2.04, marketCap: 1231.9, roic: 5.07, roa: 2.96, roe: 11.96 },
+                    { symbol: 'SCI', currentPrice: 213.66, peTTM: 11.8, epsTTM: 18.11, dividendYield: 0.2, marketCap: 9952.26, roic: 8.23, roa: 7.2, roe: 10.14 },
+                    { symbol: 'SUNDARAMHLD', currentPrice: 391.5, peTTM: 21.1, epsTTM: 18.55, dividendYield: 1.51, marketCap: 8695.37, roic: 11.12, roa: 10.77, roe: 11.12 },
+                    { symbol: 'TATAMOTORS', currentPrice: 711, peTTM: 11.47, epsTTM: 62.01, dividendYield: 0.66, marketCap: 261751.97, roic: 15.37, roa: 7.34, roe: 23.96 },
+                    { symbol: 'VLSFINANCE', currentPrice: 248.03, peTTM: 18.26, epsTTM: 13.59, dividendYield: 0.74, marketCap: 843.55, roic: 10.87, roa: 9.12, roe: 10.87 },
+                    { symbol: 'VIKASLIFE', currentPrice: 2.54, peTTM: -45.48, epsTTM: -0.06, dividendYield: 0, marketCap: 471.85, roic: -1.75, roa: -1.45, roe: -1.99 }
+                ],
+                'Q3': [],
+                'Q4': []
+            },
+            '2026': {
+                'Q1': [],
+                'Q2': [],
+                'Q3': [],
+                'Q4': []
+            }
+        };
+
+        // DOM elements
+        const yearSelect = document.getElementById('yearSelect');
+        const tabButtons = document.querySelectorAll('.tab');
+        const metricsTable = document.getElementById('metricsTable');
+
+        // Current state
+        let currentYear = '2025';
+        let currentQuarter = 'Q2';
+        let sortColumn = null;
+        let sortDirection = 'asc';
+
+        // Initialize the app
+        function init() {
+            renderMetrics();
+            setupEventListeners();
+        }
+
+        // Sort metrics
+        function sortMetrics(metrics, column, direction) {
+            return metrics.sort((a, b) => {
+                let valueA = a[column];
+                let valueB = b[column];
+
+                // Handle string sorting (case-insensitive)
+                if (column === 'symbol') {
+                    valueA = valueA.toLowerCase();
+                    valueB = valueB.toLowerCase();
+                }
+
+                // Handle null/undefined values
+                if (valueA == null) valueA = -Infinity;
+                if (valueB == null) valueB = -Infinity;
+
+                if (valueA < valueB) return direction === 'asc' ? -1 : 1;
+                if (valueA > valueB) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // Render metrics for the selected year and quarter
+        function renderMetrics() {
+            metricsTable.innerHTML = '';
+
+            const metrics = metricsData[currentYear][currentQuarter];
+
+            if (!metrics || metrics.length === 0) {
+                metricsTable.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h3>No metrics available</h3>
+                        <p>No data for ${currentQuarter} ${currentYear}. Add data to view metrics.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedMetrics = [...metrics];
+            if (sortColumn) {
+                sortMetrics(sortedMetrics, sortColumn, sortDirection);
+            }
+
+            const table = document.createElement('table');
+            table.className = 'metrics-table';
+            
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th data-sort="symbol">Stock Name<i class="fas fa-sort${sortColumn === 'symbol' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'symbol' ? ' active' : ''}"></i></th>
+                        <th data-sort="currentPrice">Price (₹)<i class="fas fa-sort${sortColumn === 'currentPrice' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'currentPrice' ? ' active' : ''}"></i></th>
+                        <th data-sort="peTTM">P/E TTM<i class="fas fa-sort${sortColumn === 'peTTM' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'peTTM' ? ' active' : ''}"></i></th>
+                        <th data-sort="epsTTM">EPS TTM (₹)<i class="fas fa-sort${sortColumn === 'epsTTM' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'epsTTM' ? ' active' : ''}"></i></th>
+                        <th data-sort="dividendYield">Dividend Yield (%)<i class="fas fa-sort${sortColumn === 'dividendYield' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'dividendYield' ? ' active' : ''}"></i></th>
+                        <th data-sort="marketCap">Market Cap (₹Cr)<i class="fas fa-sort${sortColumn === 'marketCap' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'marketCap' ? ' active' : ''}"></i></th>
+                        <th data-sort="roic">ROIC (%)<i class="fas fa-sort${sortColumn === 'roic' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'roic' ? ' active' : ''}"></i></th>
+                        <th data-sort="roa">ROA (%)<i class="fas fa-sort${sortColumn === 'roa' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'roa' ? ' active' : ''}"></i></th>
+                        <th data-sort="roe">ROE (%)<i class="fas fa-sort${sortColumn === 'roe' ? (sortDirection === 'asc' ? '-up' : '-down') : ''} sort-icon${sortColumn === 'roe' ? ' active' : ''}"></i></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+            
+            const tbody = table.querySelector('tbody');
+
+            sortedMetrics.forEach(metric => {
+                const row = document.createElement('tr');
+                const isSGB = metric.symbol.startsWith('SGB');
+                const link = isSGB
+                    ? `https://in.tradingview.com/symbols/BSE-${metric.symbol}/`
+                    : `https://www.google.com/finance/quote/${metric.symbol}:NSE`;
+                
+                row.innerHTML = `
+                    <td><a href="${link}" target="_blank">${metric.symbol}</a></td>
+                    <td class="metric-value">₹${metric.currentPrice.toFixed(2)}</td>
+                    <td class="metric-value">${metric.peTTM.toFixed(2)}</td>
+                    <td class="metric-value">₹${metric.epsTTM.toFixed(2)}</td>
+                    <td class="metric-value">${metric.dividendYield.toFixed(2)}%</td>
+                    <td class="metric-value">${metric.marketCap.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+                    <td class="metric-value">${metric.roic.toFixed(2)}%</td>
+                    <td class="metric-value">${metric.roa.toFixed(2)}%</td>
+                    <td class="metric-value">${metric.roe.toFixed(2)}%</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+
+            metricsTable.appendChild(table);
+
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', handleSortClick);
+            });
+        }
+
+        function handleSortClick(e) {
+            const column = e.currentTarget.dataset.sort;
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            renderMetrics();
+        }
+
+        function handleYearChange(e) {
+            currentYear = e.target.value;
+            currentQuarter = 'Q1'; // Reset to Q1 when year changes
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabButtons[0].classList.add('active');
+            renderMetrics();
+        }
+
+        function handleQuarterClick(e) {
+            const quarter = e.currentTarget.dataset.quarter;
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            currentQuarter = quarter;
+            sortColumn = null; // Reset sorting when changing quarter
+            sortDirection = 'asc';
+            renderMetrics();
+        }
+
+        function setupEventListeners() {
+            yearSelect.addEventListener('change', handleYearChange);
+            tabButtons.forEach(btn => btn.addEventListener('click', handleQuarterClick));
+        }
+
+        init();
+    </script>
+</body>
+</html>
